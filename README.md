@@ -1,4 +1,6 @@
 ## casinoman: wainwright's casinodog
+
+
 base plugin with all game sense, package works best under fresh install of laravel ++ breeze "api" package, but should work within any existing laravel package aswell. 
 
 **Still somewhat rough edges, however you can use installer to setup: https://github.com/casino-man/wainwright-installer.sh.**
