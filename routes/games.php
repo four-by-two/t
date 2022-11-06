@@ -65,7 +65,7 @@ Route::middleware('api', 'throttle:5000,1')->prefix('gs2c/')->group(function () 
 
 });
 
-Route::middleware('api', 'throttle:5000,1')->prefix('dynamic_asset/')->group(function ($provider) { 
+Route::middleware('web', 'throttle:5000,1')->prefix('dynamic_asset/')->group(function ($provider) { 
 # Used so you can use a generalized syntax for assets you wish to edit dynamically. Usually want to use this when provider uses .js or .json files with config variables instead of within HTML or url params. Try to keep loading files to absolute minimum, as it affects game performance but also because all gameproviders are jampacked with crap it will be very unsafe, really it is unsafe to load even single file like this and if needed a lot and/or for production you really want to save the game assets either statically (and sanitizing manually each game) or create seperate "launcher" instance where you only load html/js files. 
 
 # These routes will end up in game controller set within casino-dog/config.php and function dynamic_asset(), for example: PragmaticPlayMain::dynamic_asset(). 

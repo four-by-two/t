@@ -83,10 +83,7 @@ class APIController
             return $validate;
         }
         $games = collect(Gameslist::build_list());
-        return $games->sortBy([
-            ['popularity', 'asc'],
-            ['typeRating', 'desc'],
-        ]);
+        return $games;
         return $games;
    }
 

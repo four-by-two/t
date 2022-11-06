@@ -47,7 +47,8 @@ class Gameslist extends Eloquent  {
     ];
 
     public static function build_list() {
-        $query = json_decode(DB::table('wainwright_gameslist')->get(), true);
+	$query = self::all()->random()->get();
+	$query = json_decode($query, true);
 
         try {
         $random = self::where('source_schema', 'softswiss')->random(1);
@@ -55,18 +56,22 @@ class Gameslist extends Eloquent  {
             $random = floatval(rand(2000, 3000));
         }
 
-
+	$count = 1;
         foreach($query as $game) {
             if($game['source_schema'] === "parimatch") {
                 $percent = rand(92, 102);
+		$game['id'] = $count;
                 $random_popularity = ($random / 100) * $percent;
-                $game['popularity'] = number_format($random_popularity, 0, '.', '');
+                $game['popularity'] = (int) number_format($random_popularity, 0, '.', '');
                 $game['image'] = 'https://static-2.herokuapp.com/pm_i/'.$game['gid'].'.png';
             } else {
+		$game['id'] = $count;
+		$game['popularity'] = (int) $game['popularity'];
                 $game['image'] = 'https://static-2.herokuapp.com/ss_i/s3/'.$game['gid'].'.png';
             }
+	    $count++;
             $games[] = $game;
-        } 
+        }
         return $games;
     }
 
