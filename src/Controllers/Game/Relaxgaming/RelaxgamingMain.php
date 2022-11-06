@@ -4,6 +4,7 @@ namespace Wainwright\CasinoDog\Controllers\Game\Relaxgaming;
 use Wainwright\CasinoDog\Controllers\Game\GameKernel;
 use Wainwright\CasinoDog\Controllers\Game\GameKernelTrait;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Wainwright\CasinoDog\Facades\ProxyHelperFacade;
 
 class RelaxgamingMain extends GameKernel
@@ -70,26 +71,25 @@ class RelaxgamingMain extends GameKernel
     public function dynamic_asset(string $asset_name, Request $request) 
     {
         if($asset_name === "config.js") {
-            
             $http = 'https://cors-4.herokuapp.com/https://d2drhksbtcqozo.cloudfront.net/casino/games-mt/'.$request->gid.'/config.js';
             $resp = ProxyHelperFacade::CreateProxy($request)->toUrl($http);
             $new_api_endpoint = config('casino-dog.games.relax.new_api_endpoint').$request->internal_token.'/'.$request->gid.'/play';  // building up the api endpoint we want to receive game events upon
             $content = str_replace('https://dev-casino-client.api.relaxg.net/game', $new_api_endpoint, $resp->getContent());
             $content = str_replace('https://stag-casino-client.api.relaxg.net/game', $new_api_endpoint, $resp->getContent());
-            
             $content = str_replace('spinDelay: true', 'spinDelay: false', $content);
             $content = str_replace('en_GB', 'en_US', $content);
-            $content = str_replace('https://d3nsdzdtjbr5ml.cloudfront.net', 'https://bragg.app', $content);
+            $content = str_replace('https://d3nsdzdtjbr5ml.cloudfront.net', 'https://casinoman.app', $content);
 
-            
             //$content = str_replace('spinDelay: false', 'google.com', $content);
             //$content = str_replace('https://d3nsdzdtjbr5ml.cloudfront.net', 'https://02-gameserver.777.dog/', $content);           
-           return $content;
+	    return response($content)->header('Content-Type', 'application/javascript');
 
         }
         if($asset_name === "getclientconfig") {
             $asset_url = 'https://iomeu-casino-client.api.relaxg.com/capi/1.0/casino/games/getclientconfig?';
-            try {
+
+
+	try {
             $referer = explode('?', request()->headers->get('referer'))[1];
             $query = $this->parse_query($referer);
             $new_api_endpoint = config('casino-dog.games.relax.new_api_endpoint').$query['token'].'/'.$query['gameid'].'/play';  // building up the api endpoint we want to receive game events upon
@@ -102,16 +102,17 @@ class RelaxgamingMain extends GameKernel
             } catch(\Exception $e) {
                 $resp = ProxyHelperFacade::CreateProxy($request)->toUrl('https://iomeu-casino-client.api.relaxg.com/capi/1.0/casino/games/getclientconfig');
                 $resp = json_decode($resp->getContent(), true);
+
+	    $referer = explode('?', request()->headers->get('referer'))[1];
+            $query = $this->parse_query($referer);
+            $new_api_endpoint = config('casino-dog.games.relax.new_api_endpoint').$query['token'].'/'.$query['gameid'].'/play';  // building up the api endpoint we want to receive game events upon
+
                 $resp['disableRgApi'] = true;
                 $resp['loadRgApiLibUrl'] = false;
                 $resp['gameServerApi'] = $new_api_endpoint;
-                
-                return $resp;
-
                 $resp = array('error' => $e->getMessage());
             }
-
-            return $resp;
+            return response($resp)->header('Content-Type', 'application/json');
 
         }
 

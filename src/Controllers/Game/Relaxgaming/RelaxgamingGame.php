@@ -26,8 +26,7 @@ class RelaxgamingGame extends RelaxgamingMain
         $select_session = $this->get_internal_session($internal_token)['data'];
 
         $real_response = $this->curl_request($real_gameserver_url, $request);
-        $data_origin = json_decode($real_response->getContent(), true);      
-        
+        $data_origin = json_decode($real_response->getContent(), true);
         if($action === 'funmoneylogin') {
             $data_origin['stats']['currency'] = 'USD';
             $data_origin['stats']['b'] = (int) $this->get_balance($internal_token);
