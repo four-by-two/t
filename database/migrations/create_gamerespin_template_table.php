@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('wainwright_gamerespin_template', function (Blueprint $table) {
             $table->id('id')->index();
             $table->string('gid', 200);
-            $table->string('game_data', 25000);
+            $table->string('game_data', 16000);
             $table->string('game_type', 200);
             $table->boolean('enabled');
             $table->timestamps();

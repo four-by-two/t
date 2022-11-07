@@ -27,8 +27,12 @@ Route::middleware('api', 'throttle:25,1')->group(function () {
 
 Route::middleware('api', 'throttle:500,1')->prefix('api')->group(function () {
 
-  Route::post('/testing/{function}', [TestingController::class, 'handle']);
-  
+Route::post('/testing/{function}', [TestingController::class, 'handle']);
+
+Route::get('/version', function (Request $request) {
+	return 'dev';
+
+});
 
 Route::any('/pusher_auth', function (Request $request) {
     $data =  [

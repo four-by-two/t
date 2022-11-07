@@ -111,6 +111,8 @@
   width: 100%;
   box-sizing: border-box;
   background: #222222;
+  margin-top: 7px;
+  margin-bottom:  25px;
   color: white;
   position: relative;
 }
@@ -243,82 +245,155 @@ body {
     </head>
     <body>
     <div id="main">
-    	<div class="fof">
+      <div class="fof">
         <form class='form' method="post" action="/install/submit">
+<!--     'server_ip' => env('WAINWRIGHT_CASINODOG_SERVER_IP', '127.0.0.1'),
+    'securitysalt' => env('WAINWRIGHT_CASINODOG_SECURITY_SALT', 'AA61BED99602F187DA5D033D74D1A556'), // salt used for general signing of entry sessions and so on
+    'domain' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')),
+    'hostname' => env('WAINWRIGHT_CASINODOG_HOSTNAME', '777.dog'),
+    'master_ip' => env('WAINWRIGHT_CASINODOG_MASTER_IP', '127.0.0.1'), // this IP should be your personal or whatever your testing on, this IP will surpass the Operator IP check
+    'testing' => env('WAINWRIGHT_CASINODOG_TESTINGCONTROLLER', true), //set to false to hard override disable all tests through TestingController. When set to 1 and APP_DEBUG is set to true in .env, you can make use of TestingController
+    'cors_anywhere' => env('WAINWRIGHT_CASINODOG_CORSPROXY', 'https://wainwrighted.herokuapp.com/'), //corsproxy, should end with slash, download cors proxy: https://gitlab.com/casinoman/static-assets/cors-proxy
+
+    'wainwright_proxy' => [
+      'get_demolink' => env('WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK', true), // set to 1 if wanting to use proxy through cors_anywhere url on game import jobs
+      'get_gamelist' => env('WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST', true), // set to 1 if wanting to use proxy through cors_anywhere url on game import jobs
+    ],
+
+    'panel_ip_restrict' => env('WAINWRIGHT_CASINODOG_PANEL_IP_RESTRICT', true), //restrict panel access based on ip, you can add allowed ip's in panel_allowed_ips
+    'panel_allowed_ips' => explode(',', env('WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST', '127.0.0.1')),
+
+    !-->
+    @php
+      try {
+      $ip = file_get_contents('https://api.ipify.org');
+      } catch(\Exception $e) {
+        $ip = "127.0.0.1";
+      }
+
+    @endphp
+
           <p class='field required'>
-            <label class='label required' for='name'>App Name</label>
-            <input class='text-input' id='name' name='name' required type='text' value='Use Tab'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_SERVER_IP</label>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_SERVER_IP' name='WAINWRIGHT_CASINODOG_SERVER_IP' required type='text' value='{{ $ip }}'>
           </p>
+
+          <hr>
+          <hr>
+
           <p class='field required'>
-            <label class='label' for='app_url'>App URL (used in API)</label>
-            <input class='text-input' required id='app_url' placeholder='https://777.dog' name='app_url' type='text'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_SECURITY_SALT</label>
+            <small><i>
+              salt used to randomize crypto hashes used for signatures, like game entry tokens, your initial admin password and so on
+            </i></small>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_SECURITY_SALT' name='WAINWRIGHT_CASINODOG_SECURITY_SALT' required type='text' value='{{ md5(now().rand(100, 200)) }}'>
           </p>
+
+          <hr>
+          <hr>
+
           <p class='field required'>
-            <label class='label' for='wildcard_domain'>App Wildcard Domain (if not using, leave blank)</label>
-            <input class='text-input' required id='wildcard_domain' name='wildcard_domain' placeholder='.777.dog' type='text'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_DOMAIN</label>
+            <small><i>
+              also will be set to your APP_URL, used for example in building API links for game communication
+            </i></small>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_DOMAIN' name='WAINWRIGHT_CASINODOG_DOMAIN' required type='text' value='https://www.domain.com'>
           </p>
-          <p class='field required half'>
-            <label class='label' for='master_ip'>Server IP</label>
-            <input class='text-input' required id='server_ip' placeholder='{{ $_SERVER["SERVER_ADDR"] }}' name='server_ip' type='text'>
+
+          <p class='field required'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_HOSTNAME</label>
+            <small><i>
+              hostname should correspond with domain entered above  
+            </i></small>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_HOSTNAME' name='WAINWRIGHT_CASINODOG_HOSTNAME' required type='text' value='domain.com'>
           </p>
-          <p class='field required half'>
-            <label class='label' for='master_ip'>Master IP</label>
-            <input class='text-input' required id='master_ip' name='master_ip' placeholder='{{ request()->DogGetIP() }}' type='text'>
+
+          <p class='field required'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_WILDCARD</label>
+            <small><i>
+              can enter seperate domain if you wish to make use of wildcard session domain, so a player can enter using "{entrytoken}.domain.com". You can just enter your domain or leave it as it is if you are not going to use this.
+            </i></small>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_WILDCARD' name='WAINWRIGHT_CASINODOG_WILDCARD' required type='text' value='.domain.com'>
           </p>
-          <p class='field half required'>
-            <label class='label' for='login'>Admin Email</label>
-            <input class='text-input' id='login' name='login' required type='text' value='admin@test.com'>
+
+
+          <p class='field required'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_MASTER_IP</label>
+            <small><i>
+              master IP bypasses the IP check that is done when creating sessions, should probably set to your own IP so it's easier to check operators session creation within the admin panel. Only applicable if you enabled IP restriction setting.
+            </i></small>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_MASTER_IP' name='WAINWRIGHT_CASINODOG_MASTER_IP' required type='text' value='{{ request()->DogGetIP() }}'>
           </p>
+
+          <p class='field required'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_CORSPROXY</label>
+            <small><i>
+              This makes us able to bypass cors origin security and functions as a proxy. F.e. used when importing game html from providers. You can find corsproxy setup (nodejs) in github or you can use public proxies:
+              'https://cors-4.herokuapp.com/', 'https://wainwrighted.herokuapp.com/', 'https://cors.app-0.casinoman.app/'
+
+              - You should check if it functions, you can check by for example going to 'https://cors-4.herokuapp.com/https://api.ipify.org'
+            </i></small>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_CORSPROXY' name='WAINWRIGHT_CASINODOG_CORSPROXY' required type='text' value='https://cors-4.herokuapp.com/'>
+          </p
+
+
+          <p class='field required'>
+            <label class='label required' for='name'>WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST</label>
+            <small><i>
+              list of ip's that can enter admin panel, only applicable if WAINWRIGHT_CASINODOG_PANEL_IP_RESTRICT is enabled. IP's should be split with comma.
+            </i></small>
+            <input class='text-input' id='WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST' name='WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST' required type='text' value='{{ request()->DogGetIP(), }}, 1.1.1.1'>
+          </p>
+
         <div class='field'>
-          <label class='label'>Select providers to import to database</label>
+          <label class='label required'>WAINWRIGHT_CASINODOG_TESTINGCONTROLLER</label>
           <ul class='checkboxes'>
-          @foreach($data['gameproviders'] as $id => $gameprovider)
             <li class='checkbox'>
-              <input class='checkbox-input' id='choice-{{ $id }}' name='choice {{ $id }}' type='checkbox' value='{{ $id }}'>
-              <label class='checkbox-label' for='choice-{{ $id }}'>{{ $gameprovider['name'] }}</label>
+              <input class='option-input' id='WAINWRIGHT_CASINODOG_TESTINGCONTROLLER-0' name='WAINWRIGHT_CASINODOG_TESTINGCONTROLLER' type='radio' value='0'>
+              <label class='option-label' for='WAINWRIGHT_CASINODOG_TESTINGCONTROLLER-0'>Disabled</label>
             </li>
-          @endforeach
+            <li class='checkbox'>
+              <input class='option-input' id='WAINWRIGHT_CASINODOG_TESTINGCONTROLLER-1' name='WAINWRIGHT_CASINODOG_TESTINGCONTROLLER' type='radio' value='1'>
+              <label class='option-label' for='WAINWRIGHT_CASINODOG_TESTINGCONTROLLER-1'>Enabled</label>
+            </li>
           </ul>
         </div>
+
+
+
         <div class='field'>
-          <label class='label'>Install Options</label>
+          <label class='label required'>WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK</label>
           <ul class='checkboxes'>
             <li class='checkbox'>
-              <input class='option-input' id='option-0' name='option' type='radio' value='0'>
-              <label class='option-label' for='option-0'>Migrate database</label>
+              <input class='option-input' id='WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK-0' name='WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK' type='radio' value='0'>
+              <label class='option-label' for='WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK-0'>Disabled</label>
             </li>
             <li class='checkbox'>
-              <input class='option-input' id='option-1' name='option' type='radio' value='1'>
-              <label class='option-label' for='option-1'>Install Admin Panel</label>
-            </li>
-            <li class='checkbox'>
-              <input class='option-input' id='option-2' name='option' type='radio' value='2'>
-              <label class='option-label' for='option-2'>Retrieve Default Gameslist</label>
-            </li>
-            <li class='checkbox'>
-              <input class='option-input' id='option-3' name='option' type='radio' value='3'>
-              <label class='option-label' for='option-3'>Setup Operator</label>
+              <input class='option-input' id='WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK-1' name='WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK' type='radio' value='1'>
+              <label class='option-label' for='WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK-1'>Enabled</label>
             </li>
           </ul>
         </div>
-        <p class='field'>
-          <label class='label' for='about'>Allowed Panel IP's</label>
-          <textarea class='textarea' cols='50' id='allowed_ips' placeholder='{{ request()->DogGetIP() }}, 127.0.0.1' value='{{ request()->DogGetIP() }}, 127.0.0.1' name='allowed_ips' rows='2'></textarea>
-        </p>
-        <p class='field half'>
-          <label class='label' for='select'>Position</label>
-          <select class='select' id='select'>
-            <option selected value=''></option>
-            <option value='ceo'>CEO</option>
-            <option value='front-end'>Front-end developer</option>
-            <option value='back-end'>Back-end developer</option>
-          </select>
-        </p>
+
+
+        <div class='field'>
+          <label class='label required'>WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST</label>
+          <ul class='checkboxes'>
+            <li class='checkbox'>
+              <input class='option-input' id='WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST-0' name='WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST' type='radio' value='0'>
+              <label class='option-label' for='WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST-0'>Disabled</label>
+            </li>
+            <li class='checkbox'>
+              <input class='option-input' id='WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST-1' name='WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST' type='radio' value='1'>
+              <label class='option-label' for='WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST-1'>Enabled</label>
+            </li>
+          </ul>
+        </div>
         <p class='field half'>
           <input class='button' type='submit' value='Send'>
         </p>
       </form>
-    	</div>
+      </div>
     </div>
     </body>
 </html>

@@ -9,22 +9,15 @@ use Symfony\Component\Process\Process;
 trait InstallNovaPanel
 {
 
-    public function installPanel() 
+    public function installPanel($verbose = NULL) 
     {
-        $zip = new \ZipArchive;
-        $res = $zip->open(__DIR__.'../../../panel.zip');
-        if ($res === TRUE) {
-          $zip->extractTo(base_path('.wainwright/'));
-          $zip->close();
-        } else {
-            $info->error('Panel files not found.');
-            die();
-        }
-        $decode_package = base64_decode('bGFyYXZlbC9ub3ZhOl40LjE3');
-        $this->requireComposerPackages($decode_package);
+        try {
         \Artisan::call('nova:install');
-        $this->installNovaStubs();
 
+        } catch(\Exception $e) {
+            
+        }
+        $this->installNovaStubs($verbose);
     }
 
     /**
@@ -32,7 +25,7 @@ trait InstallNovaPanel
      *
      * @return void
      */
-    public function installNovaStubs()
+    public function installNovaStubs(string $verbose)
     {
 
 
@@ -52,7 +45,7 @@ trait InstallNovaPanel
             __DIR__ . '../../../stubs/nova/User.php' => $stubsPathBaseDir . '/User.php',
         ];
 
-        $this->writeStubs($files);
+        $this->writeStubs($files, $verbose);
 
         if (!is_dir($stubsPathActions = base_path('app/Nova/Actions'))) {
             (new Filesystem)->makeDirectory($stubsPathActions, 0755, true);
@@ -70,7 +63,7 @@ trait InstallNovaPanel
             __DIR__ . '../../../stubs/nova/Actions/StoreImageS3.php' => $stubsPathActions . '/StoreImageS3.php',
         ];
 
-        $this->writeStubs($files);
+        $this->writeStubs($files, $verbose);
 
 
         if (!is_dir($stubsPathDashboards = base_path('app/Nova/Dashboards'))) {
@@ -81,7 +74,7 @@ trait InstallNovaPanel
             __DIR__ . '../../../stubs/nova/Dashboards/Main.php' => $stubsPathDashboards . '/Main.php',
         ];
 
-        $this->writeStubs($files);
+        $this->writeStubs($files, $verbose);
 
         if (!is_dir($stubsPathFilters = base_path('app/Nova/Filters'))) {
             (new Filesystem)->makeDirectory($stubsPathFilters, 0755, true);
@@ -93,26 +86,31 @@ trait InstallNovaPanel
             __DIR__ . '../../../stubs/nova/Filters/UploadedImageS3.php' => $stubsPathFilters . '/UploadedImageS3.php',
         ];
         
-        $this->writeStubs($files);
+        $this->writeStubs($files, $verbose);
 
         $this->info('Stubs published.');
     }
 
-    public function writeStubs($files):void {
+    public function writeStubs($files, $verbose):void {
         foreach ($files as $from => $to) {
             if (!file_exists($to)) {
                 file_put_contents($to, file_get_contents($from));
                 $this->info('> '.$to.' saved.');
             } else {
-                if($this->confirm($to.' exists already. Do you want to overwrite this file?')) {
+                if($verbose === 'silent') {
                     file_put_contents($to, file_get_contents($from));
-                    $this->info('> '.$to.' saved.');
                 } else {
-                    $this->error('Skipped '.$to);
+                    if($this->confirm($to.' exists already. Do you want to overwrite this file?')) {
+                        file_put_contents($to, file_get_contents($from));
+                        $this->info('> '.$to.' saved.');
+                    } else {
+                        $this->error('Skipped '.$to);
+                    }
                 }
             }
         }
     }
+
 
 
 }

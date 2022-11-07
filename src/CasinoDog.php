@@ -19,6 +19,10 @@ class CasinoDog
         return DataController::getGames();
     }
 
+    public function getSetting() {
+        return DataController::getGames();
+    }
+
     public static function generate_sign($token) {
         $signature = new SignatureFunctions;
         return $signature->generate_sign($token);
