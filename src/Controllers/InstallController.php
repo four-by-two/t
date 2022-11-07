@@ -10,7 +10,7 @@ use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 class InstallController
-{   
+{
    use ApiResponseHelper;
 
     public function show()
@@ -25,7 +25,7 @@ class InstallController
         $this->check_install_state();
         $validate = $this->installValidation($request);
 
-        if (!is_dir($errorBlade = base_path('resources/views/errors'))) {
+        if (!is_dir(base_path('resources/views/errors'))) {
             $this->errorStubs();
         }
 
