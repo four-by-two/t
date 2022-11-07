@@ -83,7 +83,7 @@ class InstallController
             \Artisan::call('up');
             copy(base_path('.env.backup'), base_path('.env'));
         } else {
-            echo "<b>.env was missing, to prevent errors you should add manually this to your environment variables:</b>"
+            echo "<b>.env was missing, to prevent errors you should add manually this to your environment variables:</b>";
             echo "\n";
             echo "\n";
             echo "<blockquote>";
