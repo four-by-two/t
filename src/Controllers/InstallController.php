@@ -20,14 +20,25 @@ class InstallController
         return view('wainwright::installer.installer');
     }
 
+    public function check_db_connection()
+    {
+        try {
+            \DB::connection()->getPDO();
+            \DB::connection()->getDatabaseName();
+            } catch (\Exception $e) {
+            abort(401, $e->getMessage());
+        }
+    }
+
     public function submit(Request $request)
     {
-        $this->check_install_state();
-        $validate = $this->installValidation($request);
-
         if (!is_dir(base_path('resources/views/errors'))) {
             $this->errorStubs();
         }
+
+        $this->check_db_connection();
+        $this->check_install_state();
+        $validate = $this->installValidation($request);
 
         if($validate->status() !== 200) {
             $message = json_decode($validate->getContent(), true)['data']['message'];
@@ -48,36 +59,65 @@ class InstallController
         } else {
             $testing_controller = true;
         }
-        if(!file_exists(base_path('.env'))) {
-            copy(base_path('.env.example'), base_path('.env'));
-            \Artisan::call('key:generate --no-ansi');            
-        }
-        copy(base_path('.env'), base_path('.env.tmp'));
-        $path = base_path('.env.tmp');
 
-
-        \Artisan::call('down');
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_DOMAIN", $domain, $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_SERVER_IP", $request['WAINWRIGHT_CASINODOG_SERVER_IP'], $path);
-        $this->putPermanentEnv("APP_URL", $request['WAINWRIGHT_CASINODOG_DOMAIN'], $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_SECURITY_SALT", $request['WAINWRIGHT_CASINODOG_SECURITY_SALT'], $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_DOMAIN", $request['WAINWRIGHT_CASINODOG_DOMAIN'], $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_HOSTNAME", $request['WAINWRIGHT_CASINODOG_HOSTNAME'], $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST", $request['WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST'], $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_WILDCARD", $request['WAINWRIGHT_CASINODOG_WILDCARD'], $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_CORSPROXY", $corsproxy, $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_TESTINGCONTROLLER", $testing_controller, $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK", $request['WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK'], $path);
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST", $request['WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST'], $path);
         \Artisan::call('casino-dog:install panel');
+        \Artisan::call('casino-dog:install migrate');
+
+        $path = base_path('.env.backup');
+        
+        if(file_exists(base_path('.env'))) {
+            copy(base_path('.env'), base_path('.env.backup'));
+            \Artisan::call('down');
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_DOMAIN", $domain, $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_SERVER_IP", $request['WAINWRIGHT_CASINODOG_SERVER_IP'], $path);
+            $this->putPermanentEnv("APP_URL", $request['WAINWRIGHT_CASINODOG_DOMAIN'], $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_SECURITY_SALT", $request['WAINWRIGHT_CASINODOG_SECURITY_SALT'], $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_HOSTNAME", $request['WAINWRIGHT_CASINODOG_HOSTNAME'], $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST", $request['WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST'], $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_WILDCARD", $request['WAINWRIGHT_CASINODOG_WILDCARD'], $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_CORSPROXY", $corsproxy, $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_TESTINGCONTROLLER", $testing_controller, $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK", $request['WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK'], $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST", $request['WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST'], $path);
+            $this->putPermanentEnv("WAINWRIGHT_CASINODOG_INSTALLABLE", "0", $path);
+            \Artisan::call('up');
+            copy(base_path('.env.backup'), base_path('.env'));
+        } else {
+
+            echo "<b>.env was missing, to prevent errors you should add manually this to your environment variables:</b>"
+            echo "\n";
+            echo "\n";
+            echo "<blockquote>";
+            echo "APP_URL=".$domain;
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_DOMAIN=".$domain;
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_SERVER_IP=".$request['WAINWRIGHT_CASINODOG_SERVER_IP'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_SECURITY_SALT=".$request['WAINWRIGHT_CASINODOG_SECURITY_SALT'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_HOSTNAME=".$request['WAINWRIGHT_CASINODOG_HOSTNAME'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST=".$request['WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_WILDCARD=".$request['WAINWRIGHT_CASINODOG_WILDCARD'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_TESTINGCONTROLLER=".$request['WAINWRIGHT_CASINODOG_TESTINGCONTROLLER'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK=".$request['WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST=".$request['WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST'];
+            echo "\n";
+            echo "WAINWRIGHT_CASINODOG_INSTALLABLE=0";
+            echo "\n";
+            echo "</blockquote>";
+
+
+        }
+
         \Artisan::call('casino-dog:install create-admin');
 
         $password = md5(env('APP_KEY').config('casino-dog.securitysalt'));
-        \Artisan::call('up');
-        copy(base_path('.env.tmp'), base_path('.env'));
-
-            abort(403, 'Run casino-dog:clear-install-state if you wish to run install again.');
-
         \Artisan::call('optimize:clear');
         return 'Login: admin@casinoman.app - Password '.$password.' - <a href="/allseeingdavid">admin panel</a>';
     }
@@ -148,7 +188,6 @@ class InstallController
 
     public function set_installed_state()
     {
-        $this->putPermanentEnv("WAINWRIGHT_CASINODOG_INSTALLABLE", "0", $path);
         file_put_contents(storage_path('framework/installed'), 1);
     }
     
@@ -181,13 +220,14 @@ class InstallController
 
     public function check_install_state()
     {  
+        if(file_exists(storage_path('framework/installed'))) {
+            abort(403, 'Run casino-dog:clear-install-state if you wish to run install again.');
+        }
+
         if(env('WAINWRIGHT_CASINODOG_INSTALLABLE') === "0") {
             abort(403, 'Run casino-dog:clear-install-state if you wish to run install again.');
         }
 
-        if(file_exists(storage_path('framework/installed'))) {
-            abort(403, 'Run casino-dog:clear-install-state if you wish to run install again.');
-        }
     }
     public function writeStubs($files, $verbose):void {
         foreach ($files as $from => $to) {
@@ -206,6 +246,3 @@ class InstallController
         }
     }
 }
-
-
-
