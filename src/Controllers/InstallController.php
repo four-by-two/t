@@ -48,8 +48,13 @@ class InstallController
         } else {
             $testing_controller = true;
         }
+        if(!file_exists(base_path('.env'))) {
+            copy(base_path('.env.example'), base_path('.env'));
+            \Artisan::call('key:generate --no-ansi');            
+        }
         copy(base_path('.env'), base_path('.env.tmp'));
         $path = base_path('.env.tmp');
+
 
         \Artisan::call('down');
         $this->putPermanentEnv("WAINWRIGHT_CASINODOG_DOMAIN", $domain, $path);
@@ -70,6 +75,8 @@ class InstallController
         $password = md5(env('APP_KEY').config('casino-dog.securitysalt'));
         \Artisan::call('up');
         copy(base_path('.env.tmp'), base_path('.env'));
+
+            abort(403, 'Run casino-dog:clear-install-state if you wish to run install again.');
 
         \Artisan::call('optimize:clear');
         return 'Login: admin@casinoman.app - Password '.$password.' - <a href="/allseeingdavid">admin panel</a>';
@@ -199,3 +206,6 @@ class InstallController
         }
     }
 }
+
+
+
