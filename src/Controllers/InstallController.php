@@ -63,9 +63,9 @@ class InstallController
         \Artisan::call('casino-dog:install panel');
         \Artisan::call('casino-dog:install migrate');
 
-        $path = base_path('.env.backup');
         
         if(file_exists(base_path('.env'))) {
+            $path = base_path('.env.backup');
             copy(base_path('.env'), base_path('.env.backup'));
             \Artisan::call('down');
             $this->putPermanentEnv("WAINWRIGHT_CASINODOG_DOMAIN", $domain, $path);
@@ -83,7 +83,6 @@ class InstallController
             \Artisan::call('up');
             copy(base_path('.env.backup'), base_path('.env'));
         } else {
-
             echo "<b>.env was missing, to prevent errors you should add manually this to your environment variables:</b>"
             echo "\n";
             echo "\n";
@@ -111,8 +110,6 @@ class InstallController
             echo "WAINWRIGHT_CASINODOG_INSTALLABLE=0";
             echo "\n";
             echo "</blockquote>";
-
-
         }
 
         \Artisan::call('casino-dog:install create-admin');
@@ -246,3 +243,6 @@ class InstallController
         }
     }
 }
+
+
+
