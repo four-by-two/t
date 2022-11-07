@@ -10,7 +10,7 @@ use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 class InstallController
-{
+{   
    use ApiResponseHelper;
 
     public function show()
@@ -76,6 +76,7 @@ class InstallController
     }
 
     public function errorStubs() {
+            $errorBlade = base_path('resources/views/errors');
             (new Filesystem)->makeDirectory($errorBlade, 0755, true);
 
             $files = [
@@ -198,6 +199,3 @@ class InstallController
         }
     }
 }
-
-
-
