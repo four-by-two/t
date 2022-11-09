@@ -59,8 +59,6 @@ class RelaxgamingMain extends GameKernel
         }
         abort(400, $message);
     }
-
-
     /*
     * dynamic_asset() used to load altered javascript from internal storage, simply point the assets you need loaded through here in the modify_content() to point to /dynamic_asset/[ASSET_NAME]
     *
@@ -85,11 +83,24 @@ class RelaxgamingMain extends GameKernel
 	    return response($content)->header('Content-Type', 'application/javascript');
 
         }
+
+        if(str_contains($asset_name, 'getclientconfig_')) {
+            $asset_url = 'https://iomeu-casino-client.api.relaxg.com/capi/1.0/casino/games/getclientconfig';
+            $resp = ProxyHelperFacade::CreateProxy($request)->toUrl($asset_url);
+            $resp = json_decode($resp->getContent(), true);
+            $exploded_asset = explode('_', $asset_name);
+            $token = $exploded_asset[1];
+            $game = $exploded_asset[2];
+            $new_api_endpoint = config('casino-dog.games.relax.new_api_endpoint').$token.'/'.$game.'/play';  // building up the api endpoint we want to receive game events upon
+            $resp['disableRgApi'] = true;
+            $resp['loadRgApiLibUrl'] = false;
+            $resp['gameServerApi'] = $new_api_endpoint;
+            return response($resp)->header('Content-Type', 'application/json');
+        }
+
         if($asset_name === "getclientconfig") {
             $asset_url = 'https://iomeu-casino-client.api.relaxg.com/capi/1.0/casino/games/getclientconfig?';
-
-
-	try {
+	       try {
             $referer = explode('?', request()->headers->get('referer'))[1];
             $query = $this->parse_query($referer);
             $new_api_endpoint = config('casino-dog.games.relax.new_api_endpoint').$query['token'].'/'.$query['gameid'].'/play';  // building up the api endpoint we want to receive game events upon
@@ -113,7 +124,6 @@ class RelaxgamingMain extends GameKernel
                 $resp = array('error' => $e->getMessage());
             }
             return response($resp)->header('Content-Type', 'application/json');
-
         }
 
     }

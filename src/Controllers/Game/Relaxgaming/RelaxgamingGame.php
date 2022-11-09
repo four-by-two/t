@@ -21,8 +21,9 @@ class RelaxgamingGame extends RelaxgamingMain
     {   
         $action = $request->action;
         $internal_token = $request->internal_token;
-        $real_gameserver_url = 'https://dev-casino-client.api.relaxg.net/game/'.$action;
-        $real_game_server_url = 'https://stag-casino-client.api.relaxg.net/game/'.$action;
+        //$real_gameserver_url = 'https://dev-casino-client.api.relaxg.net/game/'.$action;
+        $real_gameserver_url = 'https://stag-casino-client.api.relaxg.net/game/'.$action;
+        //$real_gameserver_url = 'https://iomeu-casino-client.api.relaxg.com/game/'.$action;
         $select_session = $this->get_internal_session($internal_token)['data'];
 
         $real_response = $this->curl_request($real_gameserver_url, $request);
@@ -34,7 +35,11 @@ class RelaxgamingGame extends RelaxgamingMain
             if($delayed_win_payout === true) {
                 $data_origin['stats']['b'] = $this->get_balance($internal_token);
             }
-            Cache::put($select_session['game_id_original'].'-buyFeatureCost-betCostMultiplier', $data_origin['config']['buyFeatureCost']);
+            if(isset($data_origin['config'])) {
+                if(isset($data_origin['config']['buyFeatureCost'])) {
+                    Cache::put($select_session['game_id_original'].'-buyFeatureCost-betCostMultiplier', $data_origin['config']['buyFeatureCost']);
+                }
+            }
         }
 
         if($action === 'gamefinished') {

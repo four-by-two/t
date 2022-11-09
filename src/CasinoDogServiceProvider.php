@@ -10,15 +10,15 @@ use Wainwright\CasinoDog\Commands\AutoConfigCasinoDog;
 use Illuminate\Support\ServiceProvider;
 use Wainwright\CasinoDog\Commands\AddOperatorAccessKey;
 use Wainwright\CasinoDog\Commands\StoreDefaultGameslist;
+use Wainwright\CasinoDog\Commands\CreateGameProviderChild;
 use Illuminate\Support\Facades\Request;
 use Wainwright\CasinoDog\Commands\CreateGameProvider;
 use Wainwright\CasinoDog\Commands\RetrieveDefaultGameslist;
-use Wainwright\CasinoDog\Commands\TestUnzip;
 use Wainwright\CasinoDog\Commands\DatabaseObserve;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\URL;
-
+use Wainwright\CasinoDog\Middleware\SecureHeaders;
 class CasinoDogServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
@@ -29,10 +29,10 @@ class CasinoDogServiceProvider extends PackageServiceProvider
             ->hasRoutes(['web', 'api', 'games'])
             ->hasViews('wainwright')
             ->hasMigrations(['create_freebets_table', 'create_gamerespin_template_table', 'create_games_thumbnails', 'create_bgaming_bonusgames_table', 'modify_users_table', 'create_crawlerdata_table', 'create_game_importer_job', 'create_datalogger_table', 'create_gameslist_table', 'create_metadata_table', 'create_parent_sessions', 'create_rawgameslist_table', 'create_operatoraccess_table'])
-            ->hasCommands(TestUnzip::class, DatabaseObserve::class, RetrieveDefaultGameslist::class, StoreDefaultGameslist::class, CreateGameProvider::class, AddOperatorAccessKey::class, AutoConfigCasinoDog::class, ControlCasinoDog::class, MigrateCasinoDog::class);
+            ->hasCommands(CreateGameProviderChild::class, DatabaseObserve::class, RetrieveDefaultGameslist::class, StoreDefaultGameslist::class, CreateGameProvider::class, AddOperatorAccessKey::class, AutoConfigCasinoDog::class, ControlCasinoDog::class, MigrateCasinoDog::class);
 
             $kernel = app(\Illuminate\Contracts\Http\Kernel::class);
-            //$kernel->pushMiddleware(\Wainwright\CasinoDog\Middleware\RestrictIpAddressMiddleware::class);
+            $kernel->pushMiddleware(\Wainwright\CasinoDog\Middleware\SecureHeaders::class);
 
             //Register the proxy
             $this->app->bind('ProxyHelper', function($app) {
@@ -58,7 +58,25 @@ class CasinoDogServiceProvider extends PackageServiceProvider
             if ($this->app->environment('production')) {
                 URL::forceScheme('https');
             }
+            $this->registerPanelCommands();
 
+    }
+
+    public function registerPanelCommands()
+    {
+         $this->commands([
+            \Laravel\Nova\Console\InstallCommand::class,
+            \Laravel\Nova\Console\PublishCommand::class,
+            \Laravel\Nova\Console\DashboardCommand::class,
+            \Laravel\Nova\Console\ResourceCommand::class,
+            \Laravel\Nova\Console\BaseResourceCommand::class,
+            \Laravel\Nova\Console\TableCommand::class,
+            \Laravel\Nova\Console\TranslateCommand::class,
+            \Laravel\Nova\Console\ToolCommand::class,
+            \Laravel\Nova\Console\TrendCommand::class,
+            \Laravel\Nova\Console\UserCommand::class,
+            \Laravel\Nova\Console\StubPublishCommand::class
+        ]);
     }
 
 }

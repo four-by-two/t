@@ -9,6 +9,11 @@
     'master_ip' => env('WAINWRIGHT_CASINODOG_MASTER_IP', '127.0.0.1'), // this IP should be your personal or whatever your testing on, this IP will surpass the Operator IP check
     'testing' => env('WAINWRIGHT_CASINODOG_TESTINGCONTROLLER', true), //set to false to hard override disable all tests through TestingController. When set to true and APP_DEBUG is set to true in .env, you can make use of TestingController
     'cors_anywhere' => env('WAINWRIGHT_CASINODOG_CORSPROXY', 'https://wainwrighted.herokuapp.com/'), //corsproxy, should end with slash, download cors proxy: https://gitlab.com/casinoman/static-assets/cors-proxy
+    'install_options' => [
+        'installable' => env('WAINWRIGHT_CASINODOG_INSTALLABLE', "0"),
+        'install_scaffold_operatorkey' => '0',
+        'admin_password' => env('WAINWRIGHT_CASINODOG_ADMIN_PASSWORD', NULL),
+    ],
 
     'wainwright_proxy' => [
       'get_demolink' => env('WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK', true), // set to 1 if wanting to use proxy through cors_anywhere url on game import jobs
@@ -46,8 +51,7 @@
       'image_source_url' => 'https://cdn.softswiss.net/i/s3/', // image url prefix
       'fallback_image_source' => 'https://cdn.softswiss.net/i/s3/', // used when image url not set direct linking
     ],
-
-
+    
     'games' => [
       'bgaming' => [
         'name' => 'Bgaming',
@@ -137,17 +141,6 @@
         'launcher_behaviour' => 'redirect', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
         'active' => 1, //set to 0 to immediate cease all access on routes
       ],
-      'nolimitcity' => [
-        'name' => 'Nolimit City',
-        'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/nolimitcity/',
-        'controller' => \Wainwright\CasinoDog\Controllers\Game\Nolimitcity\NolimitcityMain::class,
-        'extra_game_metadata' => 0,
-        'fake_iframe_url' => 0,
-        'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class
-        'custom_entry_path' => 0,
-        'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
-        'active' => 1, //set to 0 to immediate cease all access on routes
-      ],
       'bsg' => [
         'name' => 'Betsoft Games',
         'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/betsoft/',
@@ -192,17 +185,6 @@
         'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
         'active' => 1, //set to 0 to immediate cease all access on routes
       ],
-      'uranus-quickspin' => [
-        'name' => 'Quickspin',
-        'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/quickspin/',
-        'controller' => \Wainwright\CasinoDog\Controllers\Game\Quickspin\QuickspinMain::class,
-        'extra_game_metadata' => 0,
-        'fake_iframe_url' => 0,
-        'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class
-        'custom_entry_path' => 0,
-        'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
-        'active' => 1, //set to 0 to immediate cease all access on routes
-      ],
       'spinomenal' => [
         'name' => 'Spinomenal',
         'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/spinomenal/',
@@ -236,43 +218,10 @@
         'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
         'active' => 1, //set to 0 to immediate cease all access on routes
       ],
-      'kalamba-games' => [
-        'name' => 'Kalamba Games',
-        'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/relaxgaming/',
-        'controller' => \Wainwright\CasinoDog\Controllers\Game\Relaxgaming\RelaxgamingMain::class,
-        'extra_game_metadata' => 0,
-        'fake_iframe_url' => 0,
-        'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class
-        'custom_entry_path' => 0,
-        'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
-        'active' => 1, //set to 0 to immediate cease all access on routes
-      ],
-      'relax-big-time-gaming' => [
+      'relax-gaming-realms' => [
         'name' => 'Big Time Gaming',
         'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/relaxgaming/',
-        'controller' => \Wainwright\CasinoDog\Controllers\Game\Relaxgaming\RelaxgamingMain::class,
-        'extra_game_metadata' => 0,
-        'fake_iframe_url' => 0,
-        'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class
-        'custom_entry_path' => 0,
-        'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
-        'active' => 1, //set to 0 to immediate cease all access on routes
-      ],
-      'relax-apollo' => [
-        'name' => 'Apollo',
-        'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/relaxgaming/',
-        'controller' => \Wainwright\CasinoDog\Controllers\Game\Relaxgaming\RelaxgamingMain::class,
-        'extra_game_metadata' => 0,
-        'fake_iframe_url' => 0,
-        'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class
-        'custom_entry_path' => 0,
-        'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
-        'active' => 1, //set to 0 to immediate cease all access on routes
-      ],
-      'relax-gaming-realms' => [
-        'name' => 'Gaming Realms',
-        'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/relaxgaming/',
-        'controller' => \Wainwright\CasinoDog\Controllers\Game\Relaxgaming\RelaxgamingMain::class,
+        'controller' => \Wainwright\CasinoDog\Controllers\Game\Bigtimegaming\BigtimegamingMain::class,
         'extra_game_metadata' => 0,
         'fake_iframe_url' => 0,
         'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class
@@ -306,17 +255,6 @@
         'name' => 'Playson',
         'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/playson/',
         'controller' => \Wainwright\CasinoDog\Controllers\Game\Playson\PlaysonMain::class,
-        'extra_game_metadata' => 0,
-        'fake_iframe_url' => 0,
-        'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class
-        'custom_entry_path' => 0,
-        'launcher_behaviour' => 'internal_game', // 'internal_game' or 'redirect' - expecting url on 'redirect' on SessionsHandler::requestSession()
-        'active' => 1, //set to 0 to immediate cease all access on routes
-      ],
-      'yggdrasil' => [
-        'name' => 'YggDrasil',
-        'new_api_endpoint' => env('WAINWRIGHT_CASINODOG_DOMAIN', env('APP_URL')).'/api/games/yggdrasil/',
-        'controller' => \Wainwright\CasinoDog\Controllers\Game\Yggdrasil\YggdrasilMain::class,
         'extra_game_metadata' => 0,
         'fake_iframe_url' => 0,
         'demolink_retrieval_method' => 0, // customize the demo link retrieval used on datacontroller, if set to 1 you will need'demolink_retrieval_method () in your Main class

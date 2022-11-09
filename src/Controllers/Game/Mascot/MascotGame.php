@@ -42,7 +42,7 @@ class MascotGame extends MascotMain
         $data_origin = json_decode($response->getContent(), true);
        
         // Example of respinning game results by creating new session:
-
+        /*
         if($data_origin['nextAction'] === 'freespin' && $action === 'spin') {
             $this->session_transfer($internal_token);
             $select_session = $this->get_internal_session($internal_token)['data'];
@@ -52,7 +52,7 @@ class MascotGame extends MascotMain
             $response = $this->curl_request($request, $url);
             $data_origin = json_decode($response->getContent(), true);
             $data_origin['buyin'] = NULL;
-        }
+        }*/
         
 
 

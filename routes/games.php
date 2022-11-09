@@ -17,7 +17,7 @@ Route::domain(config('casino-dog.hostname'))->group(function () {
         Route::get('/g', [SessionsHandler::class, 'entrySession'])->name('g'); // defaulted "entry" session location
         Route::get('/redirect_netent', [NetentMain::class, 'redirect_catch_content']); //used to hijack legitimate netent session to use our api 
         Route::get('/prelauncher_netent', [NetentMain::class, 'prelauncher_view']); //used to hijack legitimate netent session to use our api
-        Route::get('/platipus/{game}/{game_code}/g', [SessionsHandler::class, 'entrySession']); //custom entry, being used in custom_entry_path() function on Platipus. You can toggle custom_entry_path usage in config/casino-dog.php
+        //Route::get('/platipus/{game}/{game_code}/g', [SessionsHandler::class, 'entrySession']); //custom entry, being used in custom_entry_path() function on Platipus. You can toggle custom_entry_path usage in config/casino-dog.php
         Route::get('/Casino/IframedView', [SessionsHandler::class, 'entrySession']); //custom entry, being used in custom_entry_path() function on Playngo. You can toggle custom_entry_path usage in config/casino-dog.php
         Route::get('/casino/ContainerLauncher', [SessionsHandler::class, 'entrySession']); //custom entry, being used in custom_entry_path() function on Playngo. You can toggle custom_entry_path usage in config/casino-dog.php
         Route::get('/casino/IframedView', [SessionsHandler::class, 'entrySession']); //custom entry, being used in custom_entry_path() function on Playngo. You can toggle custom_entry_path usage in config/casino-dog.php
@@ -62,65 +62,20 @@ Route::middleware('api', 'throttle:5000,1')->prefix('gs2c/')->group(function () 
         $game_controller_kernel = new $game_controller;
         return $game_controller_kernel->promo_event($request);
     })->where('slug', '([A-Za-z0-9_.\-\/]+)');
-
 });
 
 Route::middleware('web', 'throttle:5000,1')->prefix('dynamic_asset/')->group(function ($provider) { 
 # Used so you can use a generalized syntax for assets you wish to edit dynamically. Usually want to use this when provider uses .js or .json files with config variables instead of within HTML or url params. Try to keep loading files to absolute minimum, as it affects game performance but also because all gameproviders are jampacked with crap it will be very unsafe, really it is unsafe to load even single file like this and if needed a lot and/or for production you really want to save the game assets either statically (and sanitizing manually each game) or create seperate "launcher" instance where you only load html/js files. 
 
 # These routes will end up in game controller set within casino-dog/config.php and function dynamic_asset(), for example: PragmaticPlayMain::dynamic_asset(). 
-
-
-
     Route::match(['get', 'post', 'head', 'patch', 'put', 'delete'] , '{provider}/{asset_name}', function($provider, $asset_name, Request $request) {
         $game_controller = config('casino-dog.games.'.$provider.'.controller');
         $game_controller_kernel = new $game_controller;
         return $game_controller_kernel->dynamic_asset($asset_name, $request);
     });
-
-
     Route::match(['get', 'post', 'head', 'patch', 'put', 'delete'] , '{provider}/{asset_name}/{slug}', function($provider, $asset_name, Request $request) {
         $game_controller = config('casino-dog.games.'.$provider.'.controller');
         $game_controller_kernel = new $game_controller;
         return $game_controller_kernel->dynamic_asset($asset_name, $request);
     })->where('slug', '([A-Za-z0-9_.\-\/]+)');
-    
-    
 });
-
-/*
-
-Route::middleware('web', 'throttle:5000,1')->prefix('platipus')->group(function () {
-    Route::match(['get', 'post', 'head', 'patch', 'put', 'delete'] , '{game}/{game_code}/{slug}', function($game, $game_code, $slug, Request $request) {
-        $game_controller = config('casino-dog.games.platipus.controller');
-        $game_controller_kernel = new $game_controller;
-        header('Content-Type: application/x-javascript');
-        echo $game_controller_kernel->dynamic_asset($game, $game_code, $slug, $request);
-        //return $game_controller_kernel->dynamic_asset($game, $game_code, $slug, $request);
-        })->where('slug', '([A-Za-z0-9_.\-\/]+)');
-});
-
-
-Route::middleware('api', 'throttle:5000,1')->prefix('api/c/platipus')->group(function () {
-    Route::match(['get', 'post', 'head', 'patch', 'put', 'delete'] , '{internal_token}/onlinecasino/games/{game}/{action}', function($internal_token, $game, $action, Request $request) {
-        $game_controller = config('casino-dog.games.platipus.controller');
-        $game_controller_kernel = new $game_controller;
-        return $game_controller_kernel->game_event($internal_token, $game, $action, $request);
-    });
-});
-
-Route::middleware('api', 'throttle:5000,1')->group(function () {
-    Route::match(['get', 'post', 'head', 'patch', 'put', 'delete'] , 'wurfl.js', function(Request $request) {
-        $game_controller = config('casino-dog.games.pragmaticplay.controller');
-        $game_controller_kernel = new $game_controller;
-        return $game_controller_kernel->dynamic_asset('wurfl.js', $request);
-    });
-});
-
-Route::match(['get', 'post', 'head', 'patch', 'put', 'delete'] , 'play_isb', function(Request $request) {
-    $game_controller = config('casino-dog.games.isoftbet.controller');
-    $game_controller_kernel = new $game_controller;
-    return $game_controller_kernel->game_event($request);
-})->where('slug', '([A-Za-z0-9_.\-\/]+)');
-*/
-

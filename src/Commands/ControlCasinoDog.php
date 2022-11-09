@@ -13,6 +13,7 @@ use Wainwright\CasinoDog\Controllers\Game\Wainwright\WainwrightCustomSlots;
 use App\Models\User;
 use Wainwright\CasinoDog\Models\Settings;
 use DB;
+use Wainwright\CasinoDog\Controllers\InstallController;
 
 class ControlCasinoDog extends Command
 {
@@ -25,6 +26,8 @@ class ControlCasinoDog extends Command
 
     public function handle()
     {
+        $install_kernel = new InstallController;
+
         if ($this->argument('auto-task')) {
             $task = $this->argument('auto-task');
 
@@ -42,8 +45,28 @@ class ControlCasinoDog extends Command
             }
 
             if($task === 'create-admin') {
-                return $this->createAdmin();
+                $create_admin = $install_kernel->createAdmin();
+                if(isset($create_admin['user'])) {
+                    $this->line('Did you know you can set default admin password by setting WAINWRIGHT_CASINODOG_ADMIN_PASSWORD in your .env or in casino-dog config?');
+                    $this->line('');
+                    $this->info('Admin user: '.$create_admin['user']);
+                    $this->info('Admin password: '.$create_admin['password']);
+                } else {
+                    $this->danger($create_admin['message']);
+                }
             }
+
+            if($task === 'clear-install-state') {
+                $clear_install_state = $install_kernel->clear_install_state();
+                if($clear_install_state === false) {
+                    $this->info('Error trying to clear install state.');
+                } else {
+                    $this->info('Install state cleared.');
+                }
+
+            }
+
+            
 
             if(str_contains($task, 'update-env:')) {
                 //syntax is update-env:{Key=value}
@@ -53,6 +76,11 @@ class ControlCasinoDog extends Command
                 $env = $this->putPermanentEnv($key, $value);
                 $this->info($key.' set to '.$env);
                 return $env;
+            }
+
+            if($task === 'set-global-api-limit') {
+                $this->replaceInBetweenInFile("perMinute\(", "\)", '500', base_path('app/Providers/RouteServiceProvider.php'));
+                $this->replaceInFile('$request->ip()', '$request->DogGetIP()', base_path('app/Providers/RouteServiceProvider.php'));
             }
 
 
@@ -136,15 +164,7 @@ class ControlCasinoDog extends Command
                 $this->info(json_encode($data_insert));
             }
 	    }
-
-	    if($this->confirm('Do you want to import DB list?')) {
-            $http = Http::get('https://ignitebets.com/gameslist.json');
-            $http = json_decode($http, true);
-            foreach($http as $game) {
-            Gameslist::insert($game);
-	    }
-        }
-        
+                
 	}
         return self::SUCCESS;
     }
@@ -197,34 +217,6 @@ class ControlCasinoDog extends Command
         return env($key);
     }
 
-    public function createAdmin()
-    {
-        if(env('WAINWRIGHT_CASINODOG_ADMIN_PASSWORD') !== NULL) {
-            $password = env('WAINWRIGHT_CASINODOG_ADMIN_PASSWORD');
-        } else {
-            $password = md5(env('APP_KEY').config('casino-dog.securitysalt'));
-        }
-
-        $select_current = User::where('email', 'admin@casinoman.app')->first();
-        if($select_current) {
-            DB::table('users')->where('email', 'admin@casinoman.app')->update([
-                'password' => bcrypt($password),
-                'is_admin' => 1
-            ]);
-            $this->info('Admin login \'admin@casinoman.app\' already exist, changed password to:'.$password);
-        } else {
-
-        $userData = [
-            'name' => 'admin',
-            'email' => 'admin@casinoman.app',
-            'password' => bcrypt($password),
-            'is_admin' => 1
-        ];
-        DB::table('users')->insert($userData);
-        $this->info('Login: admin@casinoman.app');
-        $this->info('Password: '.$password);
-        }
-    }
 
     protected function requireComposerPackages($packages)
     {
