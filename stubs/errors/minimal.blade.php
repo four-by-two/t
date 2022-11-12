@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>@yield('title')</title>
-         
         <link rel="icon" type="image/x-icon" href="https://i.ibb.co/hfLLWjZ/ezgif-1-62518d2ae2.png"> 
         <link href="https://fonts.bunny.net/css?family=space-grotesk:300,400,500,600,700" rel="stylesheet" />
         <style>
@@ -67,7 +66,6 @@
                 font-weight: 700;
                 line-height: 1;
                 transition: transform 200ms,background 200ms;
-                
                 &:hover {
                     transform: translateY(-2px);
                 }
@@ -78,9 +76,9 @@
     <body>
     <div id="main">
     	<div class="fof">
-                <p><h2><b>
+                <p><h3><b>
                 @yield('message')
-                </b></h2></p>
+                </b></h3></p>
                 <p><small>Request IP: @php echo request()->DogGetIP(); @endphp - Error @yield('code')</p>
                 <p><button onclick="history.back()">Go Back</button></p>
     	</div>

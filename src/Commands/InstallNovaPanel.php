@@ -23,9 +23,8 @@ trait InstallNovaPanel
      *
      * @return void
      */
-    public function installNovaStubs(string $verbose)
+    public function installNovaStubs(string $verbose = NULL)
     {
-
 
         if (!is_dir($stubsPathBaseDir = base_path('app/Nova'))) {
             (new Filesystem)->makeDirectory($stubsPathBaseDir, 0755, true);
@@ -64,6 +63,31 @@ trait InstallNovaPanel
         $this->writeStubs($files, $verbose);
 
 
+        if (!is_dir($stubsPathActions = base_path('app/Nova/Metrics'))) {
+            (new Filesystem)->makeDirectory($stubsPathActions, 0755, true);
+        }
+
+
+        $files = [
+            __DIR__ . '../../../stubs/nova/Metrics/DefaultGameImporter.php' => $stubsPathActions . '/DefaultGameImporter.php',
+            __DIR__ . '../../../stubs/nova/Metrics/GamesAmount.php' => $stubsPathActions . '/GamesAmount.php',
+            __DIR__ . '../../../stubs/nova/Metrics/DefaultGamelistTable.php' => $stubsPathActions . '/DefaultGamelistTable.php',
+            __DIR__ . '../../../stubs/nova/Metrics/GamesPerProvider.php' => $stubsPathActions . '/GamesPerProvider.php',
+        ];
+
+        $this->writeStubs($files, $verbose);
+
+        if (!is_dir($stubsPathActions = base_path('app/Nova/Helper'))) {
+            (new Filesystem)->makeDirectory($stubsPathActions, 0755, true);
+        }
+
+
+        $files = [
+            __DIR__ . '../../../stubs/nova/Helper/DefaultGameHelper.php' => $stubsPathActions . '/DefaultGameHelper.php',
+        ];
+
+        $this->writeStubs($files, $verbose);
+
         if (!is_dir($stubsPathDashboards = base_path('app/Nova/Dashboards'))) {
             (new Filesystem)->makeDirectory($stubsPathDashboards, 0755, true);
         }
@@ -83,7 +107,7 @@ trait InstallNovaPanel
             __DIR__ . '../../../stubs/nova/Filters/SourcedDemourl.php' => $stubsPathFilters . '/SourcedDemourl.php',
             __DIR__ . '../../../stubs/nova/Filters/UploadedImageS3.php' => $stubsPathFilters . '/UploadedImageS3.php',
         ];
-        
+
         $this->writeStubs($files, $verbose);
 
         $this->info('Stubs published.');

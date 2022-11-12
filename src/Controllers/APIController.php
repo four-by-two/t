@@ -78,10 +78,10 @@ class APIController
 
    public function gamesListEndpoint(string $layout, Request $request)
    {
-        $validate = $this->operatorKeyValidation($request);
-        if($validate->status() !== 200) {
-            return $validate;
-        }
+        //$validate = $this->operatorKeyValidation($request);
+        //if($validate->status() !== 200) {
+        //    return $validate;
+        //}
         $games = collect(Gameslist::build_list());
         return $games;
         return $games;
@@ -340,11 +340,11 @@ class APIController
             return $this->respondError($prepareResponse);
         }
 
-        $operator_verify = OperatorsController::verifyKey($request->operator_key, $request->DogGetIP());
-        if($operator_verify === false) {
-                $prepareResponse = array('message' => 'Operator key did not pass validation.', 'request_ip' => $request->DogGetIP());
-                return $this->respondError($prepareResponse);
-        }
+        //$operator_verify = OperatorsController::verifyKey($request->operator_key, $request->DogGetIP());
+        //if($operator_verify === false) {
+        //        $prepareResponse = array('message' => 'Operator key did not pass validation.', 'request_ip' => $request->DogGetIP());
+        //        return $this->respondError($prepareResponse);
+        //}
 
         $operator_ping = OperatorsController::operatorPing($request->operator_key, $request->DogGetIP());
         if($operator_ping === false) {

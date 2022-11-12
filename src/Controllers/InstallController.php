@@ -13,7 +13,7 @@ use Wainwright\CasinoDog\Models\OperatorAccess;
 use Wainwright\CasinoDog\Models\Gameslist;
 
 class InstallController
-{   
+{
    use ApiResponseHelper;
 
     public function show()
@@ -40,7 +40,7 @@ class InstallController
         }
 
         $this->check_db_connection();
-        $this->check_install_state();
+	$this->check_install_state();
         $validate = $this->installValidation($request);
 
         if($validate->status() !== 200) {
@@ -62,7 +62,7 @@ class InstallController
         } else {
             $testing_controller = "true";
         }
-        
+
         $this->panelServiceProviderStub();
         \Artisan::call('nova:install');
         \Artisan::call('nova:publish');
@@ -76,7 +76,7 @@ class InstallController
         replaceInFile('$request->ip()', '$request->DogGetIP()', base_path('app/Providers/RouteServiceProvider.php'));
 
         if (view()->exists("wainwright::playground.index")) {
-            \Artisan::call('casino-dog-operator-api migrate');
+            //\Artisan::call('casino-dog-operator migrate');
             \Artisan::call('vendor:publish --tag="casino-dog-operator-api-migrations"');
             $user = User::where('email', 'admin@casinoman.app')->first();
             $callback_url = $domain.'/api/casino-dog-operator-api/callback';
@@ -98,8 +98,8 @@ class InstallController
         echo "WAINWRIGHT_CASINODOG_SERVER_IP=".$request['WAINWRIGHT_CASINODOG_SERVER_IP']."<br>";
         echo "WAINWRIGHT_CASINODOG_SECURITY_SALT=".$request['WAINWRIGHT_CASINODOG_SECURITY_SALT']."<br>";
         echo "WAINWRIGHT_CASINODOG_HOSTNAME=".$request['WAINWRIGHT_CASINODOG_HOSTNAME']."<br>";
-        echo "WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST=".$request['WAINWRIGHT_CASINODOG_PANEL_ALLOWED_IP_LIST']."<br>";
         echo "WAINWRIGHT_CASINODOG_WILDCARD=".$request['WAINWRIGHT_CASINODOG_WILDCARD']."<br>";
+	echo "WAINWRIGHT_CASINODOG_CORSPROXY=".$cors_anywhere."<br>";
         echo "WAINWRIGHT_CASINODOG_TESTINGCONTROLLER=".$request['WAINWRIGHT_CASINODOG_TESTINGCONTROLLER']."<br>";
         echo "WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK=".$request['WAINWRIGHT_CASINODOG_PROXY_GETDEMOLINK']."<br>";
         echo "WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST=".$request['WAINWRIGHT_CASINODOG_PROXY_GETGAMELIST']."<br>";
@@ -118,11 +118,9 @@ class InstallController
             echo "WAINWRIGHT_CASINODOG_OPERATOR_API_GAMESLIST=".$gameserver_api_gameslist."<br>";
             echo "WAINWRIGHT_CASINODOG_OPERATOR_API_ACCESSPING=".$gameserver_api_accessping."<br>";
             echo "</blockquote>";
-        } 
-
+        }
         echo "Your login details: ".$create_admin['user']." your password: ".$create_admin['password'];
-        echo "Admin panel: <a href='/allseeingdavid'>/allseeingdavid</a>";
-
+        echo " -- Admin panel: <a href='/allseeingdavid'>/allseeingdavid</a>";
 
         $password = md5(env('APP_KEY').config('casino-dog.securitysalt'));
         \Artisan::call('optimize:clear');
@@ -283,8 +281,8 @@ class InstallController
                 return $data;
             }
         } catch(\Exception $e) {
-            save_log('InstallController():createAdmin()', $e->getMessage());
-
+            //save_log('InstallController():createAdmin()', $e->getMessage());
+		return $e->getMessage();
 
         }
 
@@ -294,7 +292,7 @@ class InstallController
     {
         file_put_contents(storage_path('framework/installed'), 1);
     }
-    
+
     public function clear_install_state()
     {
         if(file_exists(storage_path('framework/installed'))) {
@@ -323,15 +321,10 @@ class InstallController
     }
 
     public function check_install_state()
-    {  
-        if(file_exists(storage_path('framework/installed'))) {
-            abort(403, 'Run "casino-dog:install clear-install-state" if you wish to run install again.');
-        }
-
+    {
         if(config('casino-dog.install_options.installable') === "0") {
-            abort(403, 'Run "casino-dog:install clear-install-state" if you wish to run install again.');
+            abort(403, 'Set INSTALLABLE flag in .env or config/casino-dog.php if you wish to run install again.');
         }
-
     }
 
     public function writeStubs($files, $verbose):void {

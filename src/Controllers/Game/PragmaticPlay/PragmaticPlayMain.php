@@ -202,14 +202,15 @@ class PragmaticPlayMain extends GameKernel
         $new_api_endpoint = config('casino-dog.games.pragmaticplay.new_api_endpoint').$token_internal.'/';
         /* Replacing HTML content of original game */
         $gc = $game_content;
+	$cors_proxy = config('casino-dog.cors_anywhere');
         $gc = str_replace('"gameService":"https://demogames.pragmaticplay.net/', '"gameService":"'.$new_api_endpoint, $gc);
         $gc = str_replace('"gameService":"https://demogamesfree.pragmaticplay.net/', '"gameService":"'.$new_api_endpoint, $gc);
         $gc = str_replace('"gameService":"https://rarenew-dk4.pragmaticplay.net/', '"gameService":"'.$new_api_endpoint, $gc);
 
         $new_api_reload_balance = str_replace('/01-dev-api.777.dog/', '', $new_api_endpoint);
         $gc = str_replace('/gs2c/reloadBalance.do', $new_api_reload_balance.'gs2c/reloadBalance.do', $gc);
-
-        $gc = str_replace('device.pragmaticplay.net/wurfl.js', 'wainwrighted.herokuapp.com/https://device.pragmaticplay.net/wurfl.js', $gc);
+	$device_wurlf = config('casino-dog.hostname').'/dynamic_asset/pragmaticplay/wurlf.js';
+        $gc = str_replace('device.pragmaticplay.net/wurfl.js', $device_wurlf, $gc);
         $gc = str_replace('cashierUrl: ""',  'cashierUrl: "/"', $gc);
         $gc = str_replace('lobbyUrl: ""',  'lobbyUrl: "/"', $gc);
 
@@ -221,8 +222,8 @@ class PragmaticPlayMain extends GameKernel
 
         $gc = str_replace('UA-83294317',  'UA-15294317', $gc);
         $gc = str_replace('//www.google-analytics.com/analytics.js', '/dynamic_asset/pragmaticplay/pragmatic-pusher.js', $gc);
-        $gc = str_replace('"datapath":"https://demogames.pragmaticplay.net/gs2c/common/', '"replaySystemContextPath":"/ReplayService","openHistoryInWindow":false, "multiProductMiniLobby":false, "currencyOriginal": "USD", "instantFrbUpdateSeconds": 180, "lobbyLaunched":false, "instantFrbEnabled":true, "amountType": "COIN", "miniLobby": true, "region": "Other", "ingameLobbyApiURL":"/dynamic_asset/pragmaticplay/minilobby.json", "historyType":"internal", "miniLobby":true, "styleName":"avnt_aventonv", "integrationType":"HTTP","sessionTimeout":"9999","openHistoryInTab":true,"datapath":"https://wainwrighted.herokuapp.com/', $gc);
-        $gc = str_replace('"datapath":"https://demogamesfree.pragmaticplay.net/gs2c/common/', '"replaySystemContextPath":"/ReplayService","openHistoryInWindow":false, "multiProductMiniLobby":false, "currencyOriginal": "USD", "instantFrbUpdateSeconds": 180, "lobbyLaunched":false, "instantFrbEnabled":true, "amountType": "COIN", "miniLobby": true, "region": "Other", "ingameLobbyApiURL":"/dynamic_asset/pragmaticplay/minilobby.json", "historyType":"internal", "miniLobby":true, "styleName":"avnt_aventonv", "integrationType":"HTTP","sessionTimeout":"9999","openHistoryInTab":true,"datapath":"https://wainwrighted.herokuapp.com/https://softswiss.pragmaticplay.net/gs2c/common/', $gc);
+        $gc = str_replace('"datapath":"https://demogames.pragmaticplay.net/gs2c/common/', '"replaySystemContextPath":"/ReplayService","openHistoryInWindow":false, "multiProductMiniLobby":false, "currencyOriginal": "USD", "instantFrbUpdateSeconds": 180, "lobbyLaunched":false, "instantFrbEnabled":true, "amountType": "COIN", "miniLobby": true, "region": "Other", "ingameLobbyApiURL":"/dynamic_asset/pragmaticplay/minilobby.json", "historyType":"internal", "miniLobby":true, "styleName":"avnt_aventonv", "integrationType":"HTTP","sessionTimeout":"9999","openHistoryInTab":true,"datapath":"'.$cors_proxy, $gc);
+        $gc = str_replace('"datapath":"https://demogamesfree.pragmaticplay.net/gs2c/common/', '"replaySystemContextPath":"/ReplayService","openHistoryInWindow":false, "multiProductMiniLobby":false, "currencyOriginal": "USD", "instantFrbUpdateSeconds": 180, "lobbyLaunched":false, "instantFrbEnabled":true, "amountType": "COIN", "miniLobby": true, "region": "Other", "ingameLobbyApiURL":"/dynamic_asset/pragmaticplay/minilobby.json", "historyType":"internal", "miniLobby":true, "styleName":"avnt_aventonv", "integrationType":"HTTP","sessionTimeout":"9999","openHistoryInTab":true,"datapath":"'.$cors_proxy.'https://softswiss.pragmaticplay.net/gs2c/common/', $gc);
 
         $gc = str_replace('"datapath":"https://rarenew-dk4.pragmaticplay.net', '"datapath":"https://wainwrighted.herokuapp.com', $gc);
         $gc = str_replace('https://rarenew-dk4.pragmaticplay.net', 'https://wainwrighted.herokuapp.com/https://rarenew-dk4.pragmaticplay.net', $gc);

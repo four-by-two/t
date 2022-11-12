@@ -15,7 +15,8 @@ class DefaultGameHelper extends Table
     public function handle($pid) {
             $this->mainGate = $pid;
             $check_state = Cache::get('defaultgameimport::'.$this->mainGate);
-            if($check_state) {
+            $check_state_all = Cache::get('defaultgameimport::all');
+            if($check_state or $check_state_all) {
             return
             MetricTableRow::make()
                 ->title('Importing: '.$pid)
@@ -31,7 +32,7 @@ class DefaultGameHelper extends Table
                     } else {
                         return [
                             MenuItem::externalLink('Upsert '.$this->mainGate.' from internal storage', '/default_game_import?pid='.$this->mainGate),
-                            MenuItem::externalLink('Upsert all providers from internal storage', '/default_game_import?pid='.$this->mainGate),
+                            MenuItem::externalLink('Upsert all providers from internal storage', '/default_game_import?pid=all'),
                             MenuItem::externalLink('Import from external source', '/allseeingdavid/resources/game-importer-jobs'),
                         ];
 
